@@ -4,9 +4,11 @@ const GOOGLE_SCRIPT_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI'; // Reemplazar con
 // Estado de la aplicación
 let currentSection = 'intro';
 let currentComparisonIndex = 0;
+let randomizedOrder = []; // Orden aleatorizado de comparaciones
 let responses = {
     demographics: {},
     comparisons: {},
+    comparisonOrder: [], // Guardar el orden para análisis
     timestamp: null,
     duration: null
 };
@@ -33,8 +35,28 @@ function initializeApp() {
     updateProgressBar();
 }
 
+// Función para aleatorizar array (Fisher-Yates shuffle)
+function shuffleArray(array) {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+}
+
 function startStudy() {
     startTime = new Date();
+    
+    // Aleatorizar orden de comparaciones
+    const indices = [0, 1, 2]; // Índices de las 3 comparaciones
+    randomizedOrder = shuffleArray(indices);
+    
+    // Guardar el orden aleatorizado para análisis posterior
+    responses.comparisonOrder = randomizedOrder.map(idx => comparisons[idx].id);
+    
+    console.log('Orden aleatorizado de comparaciones:', responses.comparisonOrder);
+    
     showSection('demographics');
 }
 
@@ -91,7 +113,9 @@ function validateDemographics() {
 }
 
 function renderComparison(index) {
-    const comparison = comparisons[index];
+    // Usar el orden aleatorizado
+    const actualComparisonIndex = randomizedOrder[index];
+    const comparison = comparisons[actualComparisonIndex];
     const container = document.getElementById('comparisonContainer');
     
     const systemADesc = getSystemDescription(comparison.systemA);
@@ -106,11 +130,11 @@ function renderComparison(index) {
                 <strong>¿En cuál de estos dos sistemas de IA confiarías más para usar en tu práctica de fisioterapia?</strong>
             </p>
             <div class="systems-grid">
-                <div class="system-card" data-system="A" onclick="selectSystem(${index}, 'A')">
+                <div class="system-card" data-system="A" onclick="selectSystem(${index}, ${actualComparisonIndex}, 'A')">
                     <div class="system-header">Sistema A</div>
                     ${renderAttributes(systemADesc)}
                 </div>
-                <div class="system-card" data-system="B" onclick="selectSystem(${index}, 'B')">
+                <div class="system-card" data-system="B" onclick="selectSystem(${index}, ${actualComparisonIndex}, 'B')">
                     <div class="system-header">Sistema B</div>
                     ${renderAttributes(systemBDesc)}
                 </div>
@@ -120,13 +144,13 @@ function renderComparison(index) {
     
     // Actualizar botones
     document.getElementById('backBtn').style.display = currentComparisonIndex > 0 ? 'block' : 'none';
-    document.getElementById('nextBtn').disabled = !responses.comparisons[`comparison${index + 1}`];
+    document.getElementById('nextBtn').disabled = !responses.comparisons[`comparison${actualComparisonIndex + 1}`];
     document.getElementById('nextBtn').textContent = 
         index === comparisons.length - 1 ? 'Finalizar' : 'Siguiente';
         
     // Si ya había una respuesta, marcarla
-    if (responses.comparisons[`comparison${index + 1}`]) {
-        const selectedSystem = responses.comparisons[`comparison${index + 1}`];
+    if (responses.comparisons[`comparison${actualComparisonIndex + 1}`]) {
+        const selectedSystem = responses.comparisons[`comparison${actualComparisonIndex + 1}`];
         document.querySelector(`[data-system="${selectedSystem}"]`).classList.add('selected');
     }
 }
@@ -156,7 +180,7 @@ function renderAttributes(systemDesc) {
     `;
 }
 
-function selectSystem(comparisonIndex, system) {
+function selectSystem(displayIndex, actualComparisonIndex, system) {
     // Remover selección previa
     document.querySelectorAll('.system-card').forEach(card => {
         card.classList.remove('selected');
@@ -165,8 +189,8 @@ function selectSystem(comparisonIndex, system) {
     // Marcar nueva selección
     document.querySelector(`[data-system="${system}"]`).classList.add('selected');
     
-    // Guardar respuesta
-    responses.comparisons[`comparison${comparisonIndex + 1}`] = system;
+    // Guardar respuesta usando el ID real de la comparación (1, 2, o 3)
+    responses.comparisons[`comparison${actualComparisonIndex + 1}`] = system;
     
     // Habilitar botón siguiente
     document.getElementById('nextBtn').disabled = false;
