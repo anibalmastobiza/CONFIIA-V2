@@ -126,8 +126,11 @@ function renderComparison(index) {
             <div class="comparison-title">
                 Comparación ${index + 1} de ${comparisons.length}
             </div>
-            <p style="text-align: center; margin-bottom: 30px; color: #666; font-size: 16px;">
+            <p style="text-align: center; margin-bottom: 10px; color: #666; font-size: 16px;">
                 <strong>¿En cuál de estos dos sistemas de IA confiarías más para usar en tu práctica de fisioterapia?</strong>
+            </p>
+            <p style="text-align: center; margin-bottom: 30px; color: #999; font-size: 14px; font-style: italic;">
+                Haz clic sobre el sistema que prefieras
             </p>
             <div class="systems-grid">
                 <div class="system-card" data-system="A" onclick="selectSystem(${index}, ${actualComparisonIndex}, 'A')">
