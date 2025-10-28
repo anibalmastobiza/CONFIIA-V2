@@ -93,8 +93,10 @@ function validateDemographics() {
     const professionalStatus = document.getElementById('professionalStatus').value;
     const experience = document.getElementById('experience').value;
     const aiFamiliarity = document.getElementById('aiFamiliarity').value;
+    const gender = document.getElementById('gender').value;
+    const ageGroup = document.getElementById('ageGroup').value;
     
-    if (!professionalStatus || !experience || !aiFamiliarity) {
+    if (!professionalStatus || !experience || !aiFamiliarity || !gender || !ageGroup) {
         alert('Por favor, completa todos los campos obligatorios (*)');
         return;
     }
@@ -105,8 +107,8 @@ function validateDemographics() {
         experience: experience,
         specialty: document.getElementById('specialty').value || 'No especificado',
         aiFamiliarity: aiFamiliarity,
-        gender: document.getElementById('gender').value || 'No especificado',
-        ageGroup: document.getElementById('ageGroup').value || 'No especificado'
+        gender: gender,
+        ageGroup: ageGroup
     };
     
     showSection('comparisons');
