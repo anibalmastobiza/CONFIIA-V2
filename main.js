@@ -1,5 +1,5 @@
 // Configuración
-const GOOGLE_SCRIPT_URL = 'TU_URL_DE_GOOGLE_APPS_SCRIPT_AQUI'; // Reemplazar con la URL del script
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-7bamGcPlODTrOVZGZJ_frSq8FlUm-oiov4YoWiWeNeUpZIf--XgrTOXbacNmCvVv/exec'; // Reemplazar con la URL del script
 
 // Estado de la aplicación
 let currentSection = 'intro';
