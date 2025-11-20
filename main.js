@@ -1,18 +1,19 @@
 // Configuración
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx-7bamGcPlODTrOVZGZJ_frSq8FlUm-oiov4YoWiWeNeUpZIf--XgrTOXbacNmCvVv/exec'; // Reemplazar con la URL del script
+const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwEgRt4B15wzOsT1t1py02-9vmUFQQcIw1W5oC_SitPyhMF5aNhY6xZ2wrCPqsrzs2Z/exec';
 
 // Estado de la aplicación
 let currentSection = 'intro';
 let currentComparisonIndex = 0;
-let randomizedOrder = []; // Orden aleatorizado de comparaciones
+let randomizedOrder = []; 
 let responses = {
     demographics: {},
-    comparisons: {},
-    comparisonOrder: [], // Guardar el orden para análisis
+    comparisons: {}, // { task1: { choice: 'A', reliability: 4 }, ... }
+    comparisonOrder: [],
     timestamp: null,
     duration: null
 };
 let startTime = null;
+let currentSelection = null; // Selección temporal antes de confirmar
 
 // Inicialización
 document.addEventListener('DOMContentLoaded', function() {
@@ -30,12 +31,11 @@ function initializeApp() {
     document.getElementById('nextToDemographics').addEventListener('click', validateDemographics);
     document.getElementById('backToDemographics').addEventListener('click', () => showSection('intro'));
     document.getElementById('nextBtn').addEventListener('click', nextComparison);
-    document.getElementById('backBtn').addEventListener('click', previousComparison);
-
+    // Botón atrás en comparaciones deshabilitado por simplicidad en flujo lógico, o solo visualización previa
+    
     updateProgressBar();
 }
 
-// Función para aleatorizar array (Fisher-Yates shuffle)
 function shuffleArray(array) {
     const shuffled = [...array];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -48,198 +48,198 @@ function shuffleArray(array) {
 function startStudy() {
     startTime = new Date();
     
-    // Aleatorizar orden de comparaciones
-    const indices = [0, 1, 2]; // Índices de las 3 comparaciones
+    // Aleatorizar el orden de las 5 tareas
+    const indices = [0, 1, 2, 3, 4]; 
     randomizedOrder = shuffleArray(indices);
     
-    // Guardar el orden aleatorizado para análisis posterior
     responses.comparisonOrder = randomizedOrder.map(idx => comparisons[idx].id);
-    
-    console.log('Orden aleatorizado de comparaciones:', responses.comparisonOrder);
+    console.log('Orden tareas:', responses.comparisonOrder);
     
     showSection('demographics');
 }
 
 function showSection(section) {
-    // Ocultar todas las secciones
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    
-    // Mostrar sección actual
     document.getElementById(section + 'Section').classList.add('active');
     currentSection = section;
-    
     updateProgressBar();
     
-    // Si es la sección de comparaciones, renderizar la primera comparación
     if (section === 'comparisons') {
         renderComparison(currentComparisonIndex);
     }
 }
 
 function updateProgressBar() {
-    const totalSteps = 5; // intro, demographics, 3 comparisons
+    const totalSteps = 7; // intro, demo, 5 tasks
     let currentStep = 0;
     
     if (currentSection === 'intro') currentStep = 0;
     else if (currentSection === 'demographics') currentStep = 1;
     else if (currentSection === 'comparisons') currentStep = 2 + currentComparisonIndex;
-    else if (currentSection === 'thankYou') currentStep = 5;
+    else if (currentSection === 'thankYou') currentStep = 7;
     
     const progress = (currentStep / totalSteps) * 100;
     document.getElementById('progressBar').style.width = progress + '%';
 }
 
 function validateDemographics() {
-    const professionalStatus = document.getElementById('professionalStatus').value;
-    const experience = document.getElementById('experience').value;
-    const aiFamiliarity = document.getElementById('aiFamiliarity').value;
-    const gender = document.getElementById('gender').value;
-    const ageGroup = document.getElementById('ageGroup').value;
+    const status = document.getElementById('professionalStatus').value;
+    const exp = document.getElementById('experience').value;
+    const spec = document.getElementById('specialty').value;
+    const fam = document.getElementById('aiFamiliarity').value;
+    const gen = document.getElementById('gender').value;
+    const age = document.getElementById('ageGroup').value;
     
-    if (!professionalStatus || !experience || !aiFamiliarity || !gender || !ageGroup) {
+    if (!status || !exp || !spec || !fam || !gen || !age) {
         alert('Por favor, completa todos los campos obligatorios (*)');
         return;
     }
     
-    // Guardar datos demográficos
     responses.demographics = {
-        professionalStatus: professionalStatus,
-        experience: experience,
-        specialty: document.getElementById('specialty').value || 'No especificado',
-        aiFamiliarity: aiFamiliarity,
-        gender: gender,
-        ageGroup: ageGroup
+        professionalStatus: status,
+        experience: exp,
+        specialty: spec,
+        aiFamiliarity: fam,
+        gender: gen,
+        ageGroup: age
     };
     
     showSection('comparisons');
 }
 
 function renderComparison(index) {
-    // Usar el orden aleatorizado
-    const actualComparisonIndex = randomizedOrder[index];
-    const comparison = comparisons[actualComparisonIndex];
+    const actualIndex = randomizedOrder[index];
+    const comparison = comparisons[actualIndex];
     const container = document.getElementById('comparisonContainer');
     
-    const systemADesc = getSystemDescription(comparison.systemA);
-    const systemBDesc = getSystemDescription(comparison.systemB);
+    // Resetear selección y Likert
+    currentSelection = null;
+    document.querySelectorAll('input[name="reliability"]').forEach(r => r.checked = false);
+    document.getElementById('postChoiceSection').classList.remove('visible');
+    document.getElementById('nextBtn').disabled = true;
+
+    const sysADesc = getSystemDescription(comparison.systemA);
+    const sysBDesc = getSystemDescription(comparison.systemB);
+    const sysCDesc = getSystemDescription(comparison.systemC);
     
     container.innerHTML = `
         <div class="comparison">
             <div class="comparison-title">
-                Comparación ${index + 1} de ${comparisons.length}
+                ${comparison.title}
             </div>
-            <p style="text-align: center; margin-bottom: 10px; color: #666; font-size: 16px;">
-                <strong>¿En cuál de estos dos sistemas de IA confiarías más para usar en tu práctica de fisioterapia?</strong>
-            </p>
-            <p style="text-align: center; margin-bottom: 30px; color: #999; font-size: 14px; font-style: italic;">
-                Haz clic sobre el sistema que prefieras
+            <p style="text-align: center; margin-bottom: 20px; color: #666;">
+                <strong>¿En cuál de estos TRES sistemas confiarías MÁS para usar en su práctica profesional?</strong>
             </p>
             <div class="systems-grid">
-                <div class="system-card" data-system="A" onclick="selectSystem(${index}, ${actualComparisonIndex}, 'A')">
-                    <div class="system-header">Sistema A</div>
-                    ${renderAttributes(systemADesc)}
+                <div class="system-card" data-system="A" onclick="selectSystem('A')">
+                    <div class="system-header">SISTEMA A</div>
+                    ${renderAttributes(sysADesc)}
                 </div>
-                <div class="system-card" data-system="B" onclick="selectSystem(${index}, ${actualComparisonIndex}, 'B')">
-                    <div class="system-header">Sistema B</div>
-                    ${renderAttributes(systemBDesc)}
+                <div class="system-card" data-system="B" onclick="selectSystem('B')">
+                    <div class="system-header">SISTEMA B</div>
+                    ${renderAttributes(sysBDesc)}
+                </div>
+                <div class="system-card" data-system="C" onclick="selectSystem('C')">
+                    <div class="system-header">SISTEMA C</div>
+                    ${renderAttributes(sysCDesc)}
                 </div>
             </div>
         </div>
     `;
     
-    // Actualizar botones
-    document.getElementById('backBtn').style.display = currentComparisonIndex > 0 ? 'block' : 'none';
-    document.getElementById('nextBtn').disabled = !responses.comparisons[`comparison${actualComparisonIndex + 1}`];
-    document.getElementById('nextBtn').textContent = 
-        index === comparisons.length - 1 ? 'Finalizar' : 'Siguiente';
-        
-    // Si ya había una respuesta, marcarla
-    if (responses.comparisons[`comparison${actualComparisonIndex + 1}`]) {
-        const selectedSystem = responses.comparisons[`comparison${actualComparisonIndex + 1}`];
-        document.querySelector(`[data-system="${selectedSystem}"]`).classList.add('selected');
-    }
+    document.getElementById('nextBtn').textContent = index === 4 ? 'Finalizar' : 'Siguiente';
 }
 
-function renderAttributes(systemDesc) {
+function renderAttributes(desc) {
     return `
         <div class="attribute">
             <div class="attribute-name">Precisión diagnóstica</div>
-            <div class="attribute-value">${systemDesc.precision}</div>
+            <div class="attribute-value">${desc.precision}</div>
         </div>
         <div class="attribute">
             <div class="attribute-name">Explicabilidad</div>
-            <div class="attribute-value">${systemDesc.explainability}</div>
+            <div class="attribute-value">${desc.explainability}</div>
         </div>
         <div class="attribute">
             <div class="attribute-name">Validación clínica</div>
-            <div class="attribute-value">${systemDesc.validation}</div>
+            <div class="attribute-value">${desc.validation}</div>
         </div>
         <div class="attribute">
             <div class="attribute-name">Control profesional</div>
-            <div class="attribute-value">${systemDesc.control}</div>
+            <div class="attribute-value">${desc.control}</div>
         </div>
         <div class="attribute">
-            <div class="attribute-name">Transparencia sobre limitaciones</div>
-            <div class="attribute-value">${systemDesc.transparency}</div>
+            <div class="attribute-name">Transparencia</div>
+            <div class="attribute-value">${desc.transparency}</div>
         </div>
     `;
 }
 
-function selectSystem(displayIndex, actualComparisonIndex, system) {
-    // Remover selección previa
-    document.querySelectorAll('.system-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-    
-    // Marcar nueva selección
+function selectSystem(system) {
+    // Marcar visualmente
+    document.querySelectorAll('.system-card').forEach(c => c.classList.remove('selected'));
     document.querySelector(`[data-system="${system}"]`).classList.add('selected');
     
-    // Guardar respuesta usando el ID real de la comparación (1, 2, o 3)
-    responses.comparisons[`comparison${actualComparisonIndex + 1}`] = system;
+    currentSelection = system;
     
-    // Habilitar botón siguiente
-    document.getElementById('nextBtn').disabled = false;
+    // Mostrar pregunta Likert
+    document.getElementById('postChoiceSection').classList.add('visible');
+    document.getElementById('postChoiceSection').scrollIntoView({ behavior: 'smooth' });
+    
+    checkStepCompletion();
 }
 
-function nextComparison() {
-    if (currentComparisonIndex < comparisons.length - 1) {
-        currentComparisonIndex++;
-        renderComparison(currentComparisonIndex);
-        updateProgressBar();
-    } else {
-        // Finalizar estudio
-        finishStudy();
+function selectLikert(value) {
+    // Seleccionar radio button programáticamente si clic en div
+    document.getElementById('likert' + value).checked = true;
+    checkStepCompletion();
+}
+
+function checkStepCompletion() {
+    const likert = document.querySelector('input[name="reliability"]:checked');
+    // Habilitar siguiente solo si hay sistema y likert seleccionado
+    if (currentSelection && likert) {
+        document.getElementById('nextBtn').disabled = false;
     }
 }
 
-function previousComparison() {
-    if (currentComparisonIndex > 0) {
-        currentComparisonIndex--;
+function nextComparison() {
+    const actualIndex = randomizedOrder[currentComparisonIndex];
+    const likertVal = document.querySelector('input[name="reliability"]:checked').value;
+    
+    // Guardar respuesta
+    responses.comparisons[`task_${actualIndex + 1}`] = {
+        selectedSystem: currentSelection,
+        reliabilityScore: likertVal
+    };
+
+    if (currentComparisonIndex < 4) {
+        currentComparisonIndex++;
         renderComparison(currentComparisonIndex);
         updateProgressBar();
+        window.scrollTo(0, 0);
+    } else {
+        finishStudy();
     }
 }
 
 async function finishStudy() {
     responses.timestamp = new Date().toISOString();
-    responses.duration = Math.round((new Date() - startTime) / 1000); // segundos
+    responses.duration = Math.round((new Date() - startTime) / 1000);
     
-    // Enviar datos a Google Sheets
+    console.log("Resultados finales:", responses);
+
     try {
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(responses)
         });
-        
-        console.log('Datos enviados correctamente');
+        console.log('Datos enviados');
     } catch (error) {
-        console.error('Error al enviar datos:', error);
+        console.error('Error envio:', error);
     }
     
-    // Mostrar página de agradecimiento
     showSection('thankYou');
 }
