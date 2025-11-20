@@ -1,94 +1,79 @@
-// Definición de atributos y niveles
+// Definición de atributos y niveles simplificados
 const attributes = {
   precision: {
     name: "Precisión diagnóstica",
-    levels: ["85%", "95%"]
+    levels: [
+      "Moderada (aprox. 85%)",
+      "Alta (95% o más)"
+    ]
   },
   explainability: {
     name: "Explicabilidad",
     levels: [
-      "Sistema tipo 'caja negra' (no explica sus recomendaciones)",
-      "Explica de forma comprensible por qué recomienda cada tratamiento"
+      "No explica el resultado (caja negra)",
+      "Explica de manera comprensible el resultado"
     ]
   },
   validation: {
     name: "Validación clínica",
     levels: [
-      "Sin validación en estudios clínicos publicados",
-      "Validado en ensayos clínicos con >1000 pacientes"
+      "Baja evidencia científica",
+      "Alta evidencia científica"
     ]
   },
   control: {
     name: "Control profesional",
     levels: [
-      "Emite recomendaciones que el fisioterapeuta puede seguir o no",
-      "Toma decisiones de tratamiento de forma automática"
+      "Emite recomendaciones",
+      "Toma decisiones automáticas"
     ]
   },
   transparency: {
     name: "Transparencia sobre limitaciones",
     levels: [
       "No informa sobre sus limitaciones o tasas de error",
-      "Muestra claramente sus limitaciones y tasa de error"
+      "Informa sobre sus limitaciones y tasas de error"
     ]
   }
 };
 
-// Definición de comparaciones (diseño ortogonal parcial)
+// Definición de las 5 TAREAS del documento (Comparación entre 3 sistemas)
+// Indices: 0 es el primer nivel, 1 es el segundo nivel (ver arriba)
 const comparisons = [
   {
     id: 1,
-    systemA: {
-      precision: 0,        // 85%
-      explainability: 1,   // Explica
-      validation: 0,       // Sin validación
-      control: 0,          // Recomendación
-      transparency: 1      // Muestra limitaciones
-    },
-    systemB: {
-      precision: 1,        // 95%
-      explainability: 0,   // Caja negra
-      validation: 1,       // Validado
-      control: 1,          // Automático
-      transparency: 0      // No informa limitaciones
-    },
-    focus: "Precisión vs Explicabilidad"
+    title: "TAREA 1 DE 5",
+    systemA: { precision: 1, explainability: 1, validation: 1, control: 1, transparency: 1 },
+    systemB: { precision: 1, explainability: 1, validation: 1, control: 0, transparency: 1 },
+    systemC: { precision: 1, explainability: 0, validation: 1, control: 1, transparency: 1 }
   },
   {
     id: 2,
-    systemA: {
-      precision: 1,        // 95%
-      explainability: 0,   // Caja negra
-      validation: 0,       // Sin validación
-      control: 0,          // Recomendación
-      transparency: 0      // No informa limitaciones
-    },
-    systemB: {
-      precision: 0,        // 85%
-      explainability: 1,   // Explica
-      validation: 1,       // Validado
-      control: 0,          // Recomendación
-      transparency: 1      // Muestra limitaciones
-    },
-    focus: "Validación y transparencia vs Precisión"
+    title: "TAREA 2 DE 5",
+    systemA: { precision: 1, explainability: 0, validation: 0, control: 1, transparency: 1 },
+    systemB: { precision: 0, explainability: 0, validation: 1, control: 1, transparency: 0 },
+    systemC: { precision: 0, explainability: 1, validation: 1, control: 1, transparency: 0 }
   },
   {
     id: 3,
-    systemA: {
-      precision: 0,        // 85%
-      explainability: 1,   // Explica
-      validation: 1,       // Validado
-      control: 1,          // Automático
-      transparency: 1      // Muestra limitaciones
-    },
-    systemB: {
-      precision: 1,        // 95%
-      explainability: 1,   // Explica
-      validation: 0,       // Sin validación
-      control: 0,          // Recomendación
-      transparency: 0      // No informa limitaciones
-    },
-    focus: "Control profesional vs Precisión"
+    title: "TAREA 3 DE 5",
+    systemA: { precision: 1, explainability: 0, validation: 0, control: 0, transparency: 1 },
+    systemB: { precision: 0, explainability: 1, validation: 0, control: 0, transparency: 1 },
+    systemC: { precision: 1, explainability: 1, validation: 1, control: 1, transparency: 0 }
+  },
+  {
+    id: 4,
+    title: "TAREA 4 DE 5",
+    systemA: { precision: 1, explainability: 1, validation: 1, control: 0, transparency: 0 },
+    systemB: { precision: 0, explainability: 1, validation: 0, control: 0, transparency: 0 },
+    systemC: { precision: 0, explainability: 0, validation: 0, control: 1, transparency: 0 }
+  },
+  {
+    id: 5,
+    title: "TAREA 5 DE 5",
+    systemA: { precision: 0, explainability: 0, validation: 0, control: 0, transparency: 1 },
+    systemB: { precision: 0, explainability: 0, validation: 1, control: 0, transparency: 0 },
+    systemC: { precision: 1, explainability: 1, validation: 0, control: 0, transparency: 1 }
   }
 ];
 
