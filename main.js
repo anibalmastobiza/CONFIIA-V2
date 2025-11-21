@@ -229,17 +229,26 @@ async function finishStudy() {
     
     console.log("Resultados finales:", responses);
 
+    // 1. CAMBIO: Mostramos la sección de agradecimiento INMEDIATAMENTE
+    // para que el usuario no note el retraso del envío.
+    showSection('thankYou');
+
+    // 2. Enviamos los datos en segundo plano
     try {
+        // Opcional: añadimos keepalive: true para intentar que se envíe 
+        // aunque el usuario cierre la pestaña rápido.
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             mode: 'no-cors',
+            keepalive: true, 
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(responses)
         });
         console.log('Datos enviados');
     } catch (error) {
         console.error('Error envio:', error);
+        // Nota: Como ya estamos en la pantalla de gracias, 
+        // si falla el envío el usuario no se enterará, pero es preferible 
+        // a que la interfaz se quede bloqueada.
     }
-    
-    showSection('thankYou');
 }
