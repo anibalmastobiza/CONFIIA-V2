@@ -1,35 +1,35 @@
 // Definición de atributos y niveles simplificados
 const attributes = {
   precision: {
-    name: "Precisión diagnóstica",
+    name: "Precisión diagnóstica de la IA",
     levels: [
       "Moderada (aprox. 85%)",
       "Alta (95% o más)"
     ]
   },
   explainability: {
-    name: "Explicabilidad",
+    name: "Explicabilidad de la IA",
     levels: [
       "No explica el resultado (caja negra)",
       "Explica de manera comprensible el resultado"
     ]
   },
   validation: {
-    name: "Validación clínica",
+    name: "Validación clínica de la IA",
     levels: [
       "Baja evidencia científica",
       "Alta evidencia científica"
     ]
   },
   control: {
-    name: "Control profesional",
+    name: "Control profesional de la IA",
     levels: [
       "Emite recomendaciones",
       "Toma decisiones automáticas"
     ]
   },
   transparency: {
-    name: "Transparencia sobre limitaciones",
+    name: "Transparencia sobre las limitaciones de la IA",
     levels: [
       "No informa sobre sus limitaciones o tasas de error",
       "Informa sobre sus limitaciones y tasas de error"
