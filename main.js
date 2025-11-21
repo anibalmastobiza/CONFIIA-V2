@@ -153,23 +153,23 @@ function renderComparison(index) {
 function renderAttributes(desc) {
     return `
         <div class="attribute">
-            <div class="attribute-name">Precisión diagnóstica</div>
+            <div class="attribute-name">Precisión diagnóstica de la IA</div>
             <div class="attribute-value">${desc.precision}</div>
         </div>
         <div class="attribute">
-            <div class="attribute-name">Explicabilidad</div>
+            <div class="attribute-name">Explicabilidad de la IA</div>
             <div class="attribute-value">${desc.explainability}</div>
         </div>
         <div class="attribute">
-            <div class="attribute-name">Validación clínica</div>
+            <div class="attribute-name">Validación clínica de la IA</div>
             <div class="attribute-value">${desc.validation}</div>
         </div>
         <div class="attribute">
-            <div class="attribute-name">Control profesional</div>
+            <div class="attribute-name">Control profesional de la IA</div>
             <div class="attribute-value">${desc.control}</div>
         </div>
         <div class="attribute">
-            <div class="attribute-name">Transparencia</div>
+            <div class="attribute-name">Transparencia de la IA</div>
             <div class="attribute-value">${desc.transparency}</div>
         </div>
     `;
